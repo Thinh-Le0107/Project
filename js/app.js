@@ -1,62 +1,122 @@
 /**
  * ==============================================================================
- * PawCare — Quản lý Hồ sơ & Lịch Chăm sóc Thú cưng
+ * PawCare — Sổ Sức Khỏe & Quản Lý Hồ Sơ Thú Cưng
  * File JavaScript: app.js
- * Thiết kế giao diện tối giản, màu trung tính và biểu tượng đơn sắc
+ * Hỗ trợ đa hồ sơ thú cưng, màn hình chọn bạn nhỏ (Profile Switcher) chuẩn thiết kế
  * ==============================================================================
  */
 
+// Ảnh đại diện mẫu chất lượng cao
+const DOG_BEAGLE_AVATAR = "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=300&auto=format&fit=crop&q=80";
+const CAT_ALN_AVATAR = "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=300&auto=format&fit=crop&q=80";
+const DOG_CORGI_AVATAR = "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=300&auto=format&fit=crop&q=80";
+
 // ==========================================
-// 1. DỮ LIỆU MẪU BAN ĐẦU (DEMO DATA)
+// 1. DỮ LIỆU BAN ĐẦU THEO HÌNH ẢNH MẪU
 // ==========================================
-const CAT_AVATAR = "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=300&auto=format&fit=crop&q=80";
-const DOG_AVATAR = "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=300&auto=format&fit=crop&q=80";
-
-const DEFAULT_PET = {
-  name: "Bơ Mập",
-  species: "Chó",
-  gender: "Đực",
-  birthDate: "2023-04-10",
-  weight: 10.5,
-  avatar: DOG_AVATAR
-};
-
-const DEFAULT_FEEDING = {
-  lifeStage: "adult" // 'kitten' | 'adult' | 'sterilized'
-};
-
-const DEFAULT_VACCINES = [
+const DEFAULT_PETS = [
   {
-    id: 1,
-    name: "Tiêm phòng dại (Rabies)",
-    lastDate: "2024-05-10",
-    nextDate: "2025-05-10",
-    cycleMonths: 12,
-    note: "Phòng khám Thú y PetCare, số lô vacxin #R-2024"
+    id: "pet-bo-map",
+    name: "Bơ Mập",
+    species: "Chó",
+    breed: "Chó Poodle",
+    gender: "Đực",
+    birthDate: "2024-03-15", // ~2 tuổi
+    weight: 4.5,
+    avatar: DOG_BEAGLE_AVATAR,
+    lifeStage: "adult",
+    vaccines: [
+      {
+        id: 101,
+        name: "Tiêm phòng dại (Rabies)",
+        lastDate: "2024-05-10",
+        nextDate: "2025-05-10",
+        cycleMonths: 12,
+        note: "Bệnh viện Thú y PetCare, số lô #R-2024"
+      },
+      {
+        id: 102,
+        name: "Tiêm mũi tổng hợp 7 bệnh (DHPPi/L4)",
+        lastDate: "2024-06-15",
+        nextDate: "2025-06-15",
+        cycleMonths: 12,
+        note: "Phòng ngừa care, parvo, viêm gan truyền nhiễm"
+      },
+      {
+        id: 103,
+        name: "Tẩy giun định kỳ",
+        lastDate: "2024-10-01",
+        nextDate: "2025-01-01",
+        cycleMonths: 3,
+        note: "Thuốc tẩy giun dạng viên nén trộn thức ăn"
+      },
+      {
+        id: 104,
+        name: "Nhỏ gáy phòng ve rận & bọ chét",
+        lastDate: "2024-11-01",
+        nextDate: "2024-12-01",
+        cycleMonths: 1,
+        note: "Nhỏ dọc sống lưng sau gáy, kiêng tắm 2 ngày"
+      }
+    ]
   },
   {
-    id: 2,
-    name: "Tiêm mũi tổng hợp 7 bệnh (DHPPi/L4)",
-    lastDate: "2024-06-15",
-    nextDate: "2025-06-15",
-    cycleMonths: 12,
-    note: "Phòng ngừa care, parvo, viêm gan truyền nhiễm"
+    id: "pet-miu-miu",
+    name: "Miu Miu",
+    species: "Mèo",
+    breed: "Mèo ALN",
+    gender: "Cái",
+    birthDate: "2024-09-10", // ~1.5 tuổi
+    weight: 3.6,
+    avatar: CAT_ALN_AVATAR,
+    lifeStage: "adult",
+    vaccines: [
+      {
+        id: 201,
+        name: "Tiêm mũi tổng hợp 4 bệnh (FVRCP)",
+        lastDate: "2024-07-20",
+        nextDate: "2025-07-20",
+        cycleMonths: 12,
+        note: "Phòng ngừa giảm bạch cầu, viêm mũi khí quản"
+      },
+      {
+        id: 202,
+        name: "Tẩy giun định kỳ",
+        lastDate: "2024-10-15",
+        nextDate: "2025-01-15",
+        cycleMonths: 3,
+        note: "Thuốc tẩy giun dạng viên"
+      }
+    ]
   },
   {
-    id: 3,
-    name: "Tẩy giun định kỳ",
-    lastDate: "2024-10-01",
-    nextDate: "2025-01-01",
-    cycleMonths: 3,
-    note: "Thuốc tẩy giun dạng viên nén trộn thức ăn"
-  },
-  {
-    id: 4,
-    name: "Nhỏ gáy phòng ve rận & bọ chét",
-    lastDate: "2024-11-01",
-    nextDate: "2024-12-01",
-    cycleMonths: 1,
-    note: "Nhỏ dọc sống lưng sau gáy, kiêng tắm 2 ngày"
+    id: "pet-banh-bao",
+    name: "Bánh Bao",
+    species: "Chó",
+    breed: "Chó Corgi",
+    gender: "Đực",
+    birthDate: "2025-03-01", // ~8 tháng
+    weight: 7.2,
+    avatar: DOG_CORGI_AVATAR,
+    lifeStage: "kitten",
+    vaccines: [
+      {
+        id: 301,
+        name: "Tiêm mũi 3 tổng hợp (Puppy)",
+        lastDate: "2024-08-10",
+        nextDate: "2025-08-10",
+        cycleMonths: 12,
+        note: "Hoàn tất phác đồ tiêm mũi con"
+      },
+      {
+        id: 302,
+        name: "Tiêm phòng dại",
+        lastDate: "2024-09-01",
+        nextDate: "2025-09-01",
+        cycleMonths: 12,
+        note: "Kiêng tắm 3 ngày sau tiêm"
+      }
+    ]
   }
 ];
 
@@ -64,57 +124,49 @@ const DEFAULT_VACCINES = [
 // 2. STATE ỨNG DỤNG & LOCALSTORAGE
 // ==========================================
 let state = {
-  pet: null,
-  feeding: null,
-  vaccines: [],
-  currentFilter: "all"
+  pets: [],
+  activePetId: null,
+  currentFilter: "all",
+  isManageMode: false
 };
 
 function initData() {
-  const savedPet = localStorage.getItem("pawcare_pet");
-  const savedFeeding = localStorage.getItem("pawcare_feeding");
-  const savedVaccines = localStorage.getItem("pawcare_vaccines");
+  const savedPets = localStorage.getItem("pawcare_pets_v2");
+  const savedActiveId = localStorage.getItem("pawcare_active_pet_id");
 
-  if (savedPet) {
-    state.pet = JSON.parse(savedPet);
-    // Tự động đồng bộ sang chú chó Beagle theo yêu cầu người dùng
-    if (state.pet.species === "Mèo" || (state.pet.avatar && state.pet.avatar.includes("514888286974"))) {
-      state.pet.species = "Chó";
-      state.pet.avatar = DOG_AVATAR;
-      state.pet.weight = 10.5;
-      localStorage.setItem("pawcare_pet", JSON.stringify(state.pet));
+  if (savedPets) {
+    try {
+      state.pets = JSON.parse(savedPets);
+    } catch (e) {
+      state.pets = JSON.parse(JSON.stringify(DEFAULT_PETS));
     }
   } else {
-    state.pet = { ...DEFAULT_PET };
-    localStorage.setItem("pawcare_pet", JSON.stringify(state.pet));
+    state.pets = JSON.parse(JSON.stringify(DEFAULT_PETS));
+    saveState();
   }
 
-  if (savedFeeding) {
-    state.feeding = JSON.parse(savedFeeding);
-  } else {
-    state.feeding = { ...DEFAULT_FEEDING };
-    localStorage.setItem("pawcare_feeding", JSON.stringify(state.feeding));
-  }
-
-  if (savedVaccines) {
-    state.vaccines = JSON.parse(savedVaccines);
-  } else {
-    state.vaccines = JSON.parse(JSON.stringify(DEFAULT_VACCINES));
-    localStorage.setItem("pawcare_vaccines", JSON.stringify(state.vaccines));
-  }
+  // Nếu có ID lưu trước đó thì gán, nếu không để null (hiện màn hình chọn)
+  state.activePetId = savedActiveId || null;
 }
 
 function saveState() {
-  localStorage.setItem("pawcare_pet", JSON.stringify(state.pet));
-  localStorage.setItem("pawcare_feeding", JSON.stringify(state.feeding));
-  localStorage.setItem("pawcare_vaccines", JSON.stringify(state.vaccines));
+  localStorage.setItem("pawcare_pets_v2", JSON.stringify(state.pets));
+  if (state.activePetId) {
+    localStorage.setItem("pawcare_active_pet_id", state.activePetId);
+  } else {
+    localStorage.removeItem("pawcare_active_pet_id");
+  }
+}
+
+function getCurrentPet() {
+  return state.pets.find(p => p.id === state.activePetId) || state.pets[0];
 }
 
 // ==========================================
-// 3. LOGIC NGHIỆP VỤ & TÍNH TOÁN
+// 3. LOGIC TÍNH TOÁN & THỜI GIAN
 // ==========================================
 
-function calculateAge(birthDateString) {
+function formatShortAge(birthDateString) {
   if (!birthDateString) return "Chưa rõ tuổi";
 
   const birth = new Date(birthDateString);
@@ -130,18 +182,27 @@ function calculateAge(birthDateString) {
 
   if (years <= 0 && months <= 0) {
     const diffDays = Math.max(1, Math.floor((now - birth) / (1000 * 60 * 60 * 24)));
-    return `${diffDays} ngày tuổi`;
+    return `${diffDays} ngày`;
   }
 
   if (years === 0) {
-    return `${months} tháng tuổi`;
+    return `${months} tháng`;
   }
 
-  if (months === 0) {
-    return `${years} tuổi`;
+  if (months === 6) {
+    return `${years}.5 tuổi`;
   }
 
-  return `${years} tuổi ${months} tháng`;
+  if (months > 0) {
+    return `${years} tuổi ${months} th`;
+  }
+
+  return `${years} tuổi`;
+}
+
+function calculateAgeFull(birthDateString) {
+  if (!birthDateString) return "Chưa rõ tuổi";
+  return formatShortAge(birthDateString);
 }
 
 function calculateFeeding(species, weight, lifeStage) {
@@ -210,46 +271,168 @@ function formatDateVN(dateString) {
 }
 
 // ==========================================
-// 4. RENDER GIAO DIỆN (DOM MANIPULATION)
+// 4. CHUYỂN ĐỔI GIAO DIỆN (VIEW SWITCHER)
 // ==========================================
 
-function renderPetProfile() {
-  const pet = state.pet;
+/**
+ * Hiển thị Màn hình Chọn bạn nhỏ (Pet Selection Screen)
+ */
+function showSelectionScreen() {
+  document.getElementById("viewPetSelection").classList.remove("hidden");
+  document.getElementById("viewPetDetail").classList.add("hidden");
+
+  state.activePetId = null;
+  state.isManageMode = false;
+  saveState();
+  renderPetGrid();
+}
+
+/**
+ * Chọn 1 bé và mở Màn hình Chi tiết sức khỏe
+ */
+function selectPetAndShowDetail(petId) {
+  state.activePetId = petId;
+  state.isManageMode = false;
+  saveState();
+
+  document.getElementById("viewPetSelection").classList.add("hidden");
+  document.getElementById("viewPetDetail").classList.remove("hidden");
+
+  renderPetDetailView();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// ==========================================
+// 5. RENDER MÀN HÌNH CHỌN BẠN NHỎ (PET SELECTION)
+// ==========================================
+
+function renderPetGrid() {
+  const container = document.getElementById("petGrid");
+  container.innerHTML = "";
+
+  // Cập nhật trạng thái nút Chế độ quản lý hồ sơ (Vị trí 4)
+  const btnManage = document.getElementById("btnToggleManageMode");
+  const txtManage = document.getElementById("txtManageMode");
+  const iconManage = document.getElementById("iconManageMode");
+
+  if (state.isManageMode) {
+    txtManage.textContent = "Hoàn tất";
+    btnManage.className = "text-xs font-semibold px-3.5 py-1.5 rounded-full bg-slate-900 text-white hover:bg-slate-800 transition flex items-center gap-1.5 shadow-xs";
+    iconManage.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />`;
+  } else {
+    txtManage.textContent = "Quản lý hồ sơ";
+    btnManage.className = "text-xs font-semibold px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition flex items-center gap-1.5 shadow-2xs";
+    iconManage.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />`;
+  }
+
+  state.pets.forEach(pet => {
+    const isSelected = pet.id === state.activePetId;
+    const ringClass = isSelected
+      ? "ring-4 ring-pawgreen-600/30 border-2 border-pawgreen-600 scale-105"
+      : "border-2 border-slate-200/80 hover:border-pawgreen-600 hover:scale-105";
+
+    // VỊ TRÍ 4: Nút X chỉ hiển thị khi bật Chế độ Quản lý!
+    const deleteButtonHtml = state.isManageMode
+      ? `
+        <button onclick="handleDeletePet(event, '${pet.id}')" title="Xóa hồ sơ ${pet.name}" class="absolute top-0 right-0 w-7 h-7 rounded-full bg-rose-500 hover:bg-rose-600 text-white border-2 border-white shadow-md flex items-center justify-center transition scale-100 hover:scale-110 z-20">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+        </button>
+      `
+      : "";
+
+    const petCol = document.createElement("div");
+    petCol.className = `relative flex flex-col items-center cursor-pointer group text-center transition ${state.isManageMode ? 'hover:scale-95' : ''}`;
+
+    petCol.innerHTML = `
+      <div class="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full p-1 bg-white shadow-sm transition duration-200 ${ringClass}">
+        <img src="${pet.avatar || DOG_BEAGLE_AVATAR}" alt="${pet.name}" class="w-full h-full rounded-full object-cover">
+        ${deleteButtonHtml}
+      </div>
+
+      <h3 class="font-bold text-base text-slate-900 mt-3 group-hover:text-pawgreen-700 transition">
+        ${pet.name}
+      </h3>
+      <p class="text-xs text-slate-400 font-medium">
+        ${pet.breed || pet.species} • ${formatShortAge(pet.birthDate)}
+      </p>
+    `;
+
+    // Click vào card: Nếu đang ở chế độ quản lý thì bấm vào pet cũng hỏi xóa, nếu bình thường thì mở chi tiết
+    petCol.onclick = (e) => {
+      if (e.target.closest("button")) return;
+      if (state.isManageMode) {
+        handleDeletePet(e, pet.id);
+        return;
+      }
+      selectPetAndShowDetail(pet.id);
+    };
+
+    container.appendChild(petCol);
+  });
+
+  // Nút "+ Thêm thú cưng" (Hồ sơ mới) theo hình mẫu
+  const addBtnCol = document.createElement("div");
+  addBtnCol.className = "flex flex-col items-center cursor-pointer group text-center transition";
+  addBtnCol.onclick = openModalAddPet;
+
+  addBtnCol.innerHTML = `
+    <div class="w-28 h-28 sm:w-32 sm:h-32 rounded-full circle-dashed-border flex items-center justify-center bg-slate-50/50 hover:bg-pawgreen-50/50 transition">
+      <span class="text-3xl font-light text-slate-400 group-hover:text-pawgreen-700 transition">+</span>
+    </div>
+    <h3 class="font-bold text-base text-slate-700 mt-3 group-hover:text-pawgreen-700 transition">
+      + Thêm thú cưng
+    </h3>
+    <p class="text-xs text-slate-400 font-medium">
+      Hồ sơ mới
+    </p>
+  `;
+
+  container.appendChild(addBtnCol);
+}
+
+// ==========================================
+// 6. RENDER MÀN HÌNH CHI TIẾT SỨC KHỎE CỦA PET
+// ==========================================
+
+function renderPetDetailView() {
+  const pet = getCurrentPet();
   if (!pet) return;
 
+  // Cập nhật nhãn tên ở thanh điều hướng trên cùng
+  document.getElementById("badgeCurrentPetName").textContent = `🐾 ${pet.name}`;
+
+  // 1. Thẻ hồ sơ thú cưng
   document.getElementById("displayPetName").textContent = pet.name;
+  document.getElementById("displayPetBreed").textContent = pet.breed ? `(${pet.breed})` : "";
   document.getElementById("displaySpeciesBadge").textContent = pet.species;
   document.getElementById("displayPetGender").textContent = pet.gender;
-  document.getElementById("displayPetAge").textContent = calculateAge(pet.birthDate);
+  document.getElementById("displayPetAge").textContent = calculateAgeFull(pet.birthDate);
   document.getElementById("displayPetWeight").textContent = pet.weight;
 
   if (pet.avatar) {
     document.getElementById("displayPetAvatar").src = pet.avatar;
   }
 
+  // Điền sẵn dữ liệu vào form sửa
   document.getElementById("inputPetName").value = pet.name || "";
   document.getElementById("selectSpecies").value = pet.species || "Chó";
+  document.getElementById("inputBreed").value = pet.breed || "";
   document.getElementById("selectGender").value = pet.gender || "Đực";
   document.getElementById("inputBirthDate").value = pet.birthDate || "";
   document.getElementById("inputWeight").value = pet.weight || "";
-}
 
-function renderFeeding() {
-  const pet = state.pet;
-  const feeding = state.feeding;
-  if (!pet || !feeding) return;
+  // 2. Bàn tính khẩu phần ăn
+  document.getElementById("selectLifeStage").value = pet.lifeStage || "adult";
+  const feedingResult = calculateFeeding(pet.species, pet.weight, pet.lifeStage);
 
-  document.getElementById("selectLifeStage").value = feeding.lifeStage || "adult";
+  document.getElementById("calcFoodGram").textContent = `${feedingResult.foodGram} g`;
+  document.getElementById("calcMealBreakdown").textContent = `~ ${feedingResult.perMealGram} g / bữa (${feedingResult.mealsCount} bữa/ngày)`;
+  document.getElementById("calcWaterMl").textContent = `${feedingResult.waterMl} ml`;
 
-  const result = calculateFeeding(pet.species, pet.weight, feeding.lifeStage);
-
-  document.getElementById("calcFoodGram").textContent = `${result.foodGram} g`;
-  document.getElementById("calcMealBreakdown").textContent = `~ ${result.perMealGram} g / bữa (${result.mealsCount} bữa/ngày)`;
-  document.getElementById("calcWaterMl").textContent = `${result.waterMl} ml`;
-}
-
-function renderHealthAlerts() {
-  const vaccines = state.vaccines;
+  // 3. Banner Cảnh báo Y tế & 3 Thẻ Dashboard
+  const vaccines = pet.vaccines || [];
   let overdueCount = 0;
   let dueSoonCount = 0;
   let safeCount = 0;
@@ -286,7 +469,7 @@ function renderHealthAlerts() {
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
       </svg>
     `;
-    alertTitle.textContent = `Cảnh báo: Có ${overdueCount} lịch chăm sóc đã quá hạn`;
+    alertTitle.textContent = `Cảnh báo: Có ${overdueCount} lịch chăm sóc của ${pet.name} đã quá hạn`;
     alertDesc.textContent = "Vui lòng kiểm tra và sắp xếp đưa bé đến cơ sở thú y gần nhất.";
     alertBadge.className = "text-xs font-medium px-2.5 py-1 rounded-md bg-rose-100 text-rose-800 border border-rose-200 whitespace-nowrap";
     alertBadge.textContent = "Quá hạn";
@@ -299,30 +482,35 @@ function renderHealthAlerts() {
       </svg>
     `;
     alertTitle.textContent = `Nhắc nhở: Có ${dueSoonCount} lịch sắp đến hạn trong 7 ngày tới`;
-    alertDesc.textContent = "Kiểm tra lịch hẹn để chuẩn bị thời gian thực hiện đúng ngày.";
+    alertDesc.textContent = `Kiểm tra lịch hẹn để chuẩn bị thời gian đưa ${pet.name} đi tiêm đúng ngày.`;
     alertBadge.className = "text-xs font-medium px-2.5 py-1 rounded-md bg-amber-100 text-amber-800 border border-amber-200 whitespace-nowrap";
     alertBadge.textContent = "Sắp đến hạn";
   } else {
     banner.className = "p-4 rounded-xl border border-slate-200 bg-white text-slate-900 transition-all flex items-center justify-between gap-4";
-    alertIconBox.className = "w-9 h-9 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center flex-shrink-0";
+    alertIconBox.className = "w-9 h-9 rounded-lg bg-pawgreen-50 text-pawgreen-700 flex items-center justify-center flex-shrink-0";
     alertIconBox.innerHTML = `
       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
       </svg>
     `;
-    alertTitle.textContent = "Lịch trình chăm sóc của bé đang an toàn";
+    alertTitle.textContent = `Lịch trình chăm sóc của ${pet.name} đang an toàn`;
     alertDesc.textContent = "Tất cả các mũi tiêm và cữ thuốc định kỳ đều được duy trì đúng thời hạn.";
-    alertBadge.className = "text-xs font-medium px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 border border-slate-200 whitespace-nowrap";
+    alertBadge.className = "text-xs font-medium px-2.5 py-1 rounded-md bg-pawgreen-100 text-pawgreen-800 border border-pawgreen-200 whitespace-nowrap";
     alertBadge.textContent = "An toàn";
   }
+
+  // 4. Danh sách Sổ tiêm chủng Timeline
+  renderVaccinesList();
 }
 
-function renderVaccines() {
+function renderVaccinesList() {
+  const pet = getCurrentPet();
   const container = document.getElementById("vaccineList");
   container.innerHTML = "";
 
   const filter = state.currentFilter;
-  const filteredList = state.vaccines.filter(v => {
+  const list = pet.vaccines || [];
+  const filteredList = list.filter(v => {
     const info = getVaccineStatus(v.nextDate);
     if (filter === "attention") return info.status === "overdue" || info.status === "due-soon";
     if (filter === "safe") return info.status === "safe";
@@ -340,7 +528,6 @@ function renderVaccines() {
 
   filteredList.forEach(v => {
     const info = getVaccineStatus(v.nextDate);
-
     let statusBadgeHtml = "";
     let borderClass = "border-slate-200";
 
@@ -364,7 +551,7 @@ function renderVaccines() {
       borderClass = "border-slate-200";
       statusBadgeHtml = `
         <span class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-pawgreen-500"></span>
           Còn ${info.daysLeft} ngày
         </span>
       `;
@@ -413,17 +600,119 @@ function renderVaccines() {
   });
 }
 
-function renderAll() {
-  renderPetProfile();
-  renderFeeding();
-  renderHealthAlerts();
-  renderVaccines();
+// ==========================================
+// 7. CÁC HÀM XỬ LÝ SỰ KIỆN (EVENT LISTENERS)
+// ==========================================
+
+// Điều hướng
+document.getElementById("navLogoBtn").addEventListener("click", (e) => {
+  e.preventDefault();
+  showSelectionScreen();
+});
+
+document.getElementById("btnBackToSelection").addEventListener("click", showSelectionScreen);
+
+// Bật / Tắt chế độ Quản lý hồ sơ (Vị trí 4)
+document.getElementById("btnToggleManageMode").addEventListener("click", () => {
+  state.isManageMode = !state.isManageMode;
+  renderPetGrid();
+});
+
+// Modal thêm thú cưng mới
+function openModalAddPet() {
+  document.getElementById("modalAddPet").classList.remove("hidden");
+  document.getElementById("newPetName").focus();
 }
 
-// ==========================================
-// 5. CÁC HÀM XỬ LÝ SỰ KIỆN (EVENT HANDLERS)
-// ==========================================
+function closeModalAddPet() {
+  document.getElementById("modalAddPet").classList.add("hidden");
+  document.getElementById("formAddPet").reset();
+}
 
+document.getElementById("btnCloseModalAddPet").addEventListener("click", closeModalAddPet);
+document.getElementById("btnCancelModalAddPet").addEventListener("click", closeModalAddPet);
+
+// Submit form tạo thú cưng mới
+document.getElementById("formAddPet").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  const name = document.getElementById("newPetName").value.trim();
+  const species = document.getElementById("newPetSpecies").value;
+  const breed = document.getElementById("newPetBreed").value.trim() || (species === "Chó" ? "Chó Cưng" : "Mèo Cưng");
+  const gender = document.getElementById("newPetGender").value;
+  const weight = parseFloat(document.getElementById("newPetWeight").value);
+  const birthDate = document.getElementById("newPetBirthDate").value;
+  const avatarFile = document.getElementById("newPetAvatarFile").files[0];
+
+  if (!name || isNaN(weight) || weight <= 0) {
+    alert("Vui lòng nhập tên và cân nặng hợp lệ!");
+    return;
+  }
+
+  const newId = "pet-" + Date.now();
+  const defaultAvatar = species === "Chó" ? DOG_BEAGLE_AVATAR : CAT_ALN_AVATAR;
+
+  const defaultNewVaccines = [
+    {
+      id: Date.now() + 1,
+      name: species === "Chó" ? "Tiêm mũi tổng hợp 7 bệnh" : "Tiêm mũi tổng hợp 4 bệnh",
+      lastDate: new Date().toISOString().split("T")[0],
+      nextDate: calculateNextDate(new Date().toISOString().split("T")[0], 12),
+      cycleMonths: 12,
+      note: "Mũi tiêm định kỳ hàng năm"
+    },
+    {
+      id: Date.now() + 2,
+      name: "Tẩy giun định kỳ",
+      lastDate: new Date().toISOString().split("T")[0],
+      nextDate: calculateNextDate(new Date().toISOString().split("T")[0], 3),
+      cycleMonths: 3,
+      note: "Uống thuốc định kỳ mỗi 3 tháng"
+    }
+  ];
+
+  if (avatarFile) {
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const newPet = {
+        id: newId,
+        name,
+        species,
+        breed,
+        gender,
+        weight,
+        birthDate,
+        avatar: event.target.result,
+        lifeStage: "adult",
+        vaccines: defaultNewVaccines
+      };
+      state.pets.push(newPet);
+      saveState();
+      closeModalAddPet();
+      selectPetAndShowDetail(newId);
+    };
+    reader.readAsDataURL(avatarFile);
+  } else {
+    const newPet = {
+      id: newId,
+      name,
+      species,
+      breed,
+      gender,
+      weight,
+      birthDate,
+      avatar: defaultAvatar,
+      lifeStage: "adult",
+      vaccines: defaultNewVaccines
+    };
+    state.pets.push(newPet);
+    saveState();
+    closeModalAddPet();
+    selectPetAndShowDetail(newId);
+  }
+});
+
+// Toggle Sửa hồ sơ
 document.getElementById("btnToggleEditPet").addEventListener("click", () => {
   const form = document.getElementById("petForm");
   const isHidden = form.classList.contains("hidden");
@@ -442,72 +731,112 @@ document.getElementById("btnCancelEditPet").addEventListener("click", () => {
   document.getElementById("btnToggleEditPet").textContent = "Sửa hồ sơ";
 });
 
-document.getElementById("petForm").addEventListener("submit", function (e) {
+// Submit Sửa hồ sơ thú cưng hiện tại
+document.getElementById("petForm").addEventListener("submit", function(e) {
   e.preventDefault();
+  const pet = getCurrentPet();
+  if (!pet) return;
 
   const name = document.getElementById("inputPetName").value.trim();
   const species = document.getElementById("selectSpecies").value;
+  const breed = document.getElementById("inputBreed").value.trim();
   const gender = document.getElementById("selectGender").value;
   const birthDate = document.getElementById("inputBirthDate").value;
   const weight = parseFloat(document.getElementById("inputWeight").value);
   const avatarFile = document.getElementById("inputAvatarFile").files[0];
 
-  if (!name) {
-    alert("Vui lòng nhập tên cho bé cưng!");
-    return;
-  }
-
-  if (isNaN(weight) || weight <= 0) {
-    alert("Vui lòng nhập cân nặng hợp lệ lớn hơn 0!");
+  if (!name || isNaN(weight) || weight <= 0) {
+    alert("Vui lòng nhập đầy đủ thông tin hợp lệ!");
     return;
   }
 
   if (avatarFile) {
     const reader = new FileReader();
-    reader.onload = function (event) {
-      state.pet = {
-        name,
-        species,
-        gender,
-        birthDate,
-        weight,
-        avatar: event.target.result
-      };
+    reader.onload = function(event) {
+      pet.name = name;
+      pet.species = species;
+      pet.breed = breed;
+      pet.gender = gender;
+      pet.birthDate = birthDate;
+      pet.weight = weight;
+      pet.avatar = event.target.result;
       saveState();
-      renderAll();
+      renderPetDetailView();
       document.getElementById("petForm").classList.add("hidden");
       document.getElementById("btnToggleEditPet").textContent = "Sửa hồ sơ";
     };
     reader.readAsDataURL(avatarFile);
   } else {
-    // Nếu đổi loài và đang dùng ảnh mẫu mặc định thì tự động đổi ảnh mẫu sang loài tương ứng
-    let currentAvatar = state.pet.avatar;
-    if (currentAvatar === CAT_AVATAR || currentAvatar === DOG_AVATAR || !currentAvatar) {
-      currentAvatar = species === "Mèo" ? CAT_AVATAR : DOG_AVATAR;
-    }
-
-    state.pet = {
-      ...state.pet,
-      name,
-      species,
-      gender,
-      birthDate,
-      weight,
-      avatar: currentAvatar
-    };
+    pet.name = name;
+    pet.species = species;
+    pet.breed = breed;
+    pet.gender = gender;
+    pet.birthDate = birthDate;
+    pet.weight = weight;
     saveState();
-    renderAll();
+    renderPetDetailView();
     document.getElementById("petForm").classList.add("hidden");
     document.getElementById("btnToggleEditPet").textContent = "Sửa hồ sơ";
   }
 });
 
-document.getElementById("selectLifeStage").addEventListener("change", function (e) {
-  state.feeding.lifeStage = e.target.value;
+// Xóa hồ sơ thú cưng từ Màn hình 1 (Chọn bạn nhỏ)
+window.handleDeletePet = function(event, petId) {
+  if (event) {
+    event.stopPropagation();
+  }
+
+  const pet = state.pets.find(p => p.id === petId);
+  if (!pet) return;
+
+  if (state.pets.length <= 1) {
+    alert(`Không thể xóa bạn nhỏ cuối cùng (${pet.name})! Danh sách cần có tối thiểu 1 hồ sơ để quản lý.`);
+    return;
+  }
+
+  const ok = confirm(`Bạn có chắc chắn muốn xóa hồ sơ của bé "${pet.name}" không?\nToàn bộ dữ liệu tiêm chủng, cân nặng và dinh dưỡng của bé sẽ bị xóa.`);
+  if (!ok) return;
+
+  state.pets = state.pets.filter(p => p.id !== petId);
+
+  if (state.activePetId === petId) {
+    state.activePetId = null;
+  }
+
   saveState();
-  renderFeeding();
+  renderPetGrid();
+};
+
+// Xóa hồ sơ thú cưng hiện tại từ Form sửa hồ sơ (Màn hình 2)
+document.getElementById("btnDeleteCurrentPet").addEventListener("click", () => {
+  const currentPet = getCurrentPet();
+  if (!currentPet) return;
+
+  if (state.pets.length <= 1) {
+    alert(`Không thể xóa bạn nhỏ cuối cùng (${currentPet.name})! Danh sách cần có tối thiểu 1 hồ sơ để quản lý.`);
+    return;
+  }
+
+  const ok = confirm(`Bạn có chắc chắn muốn xóa vĩnh viễn hồ sơ của bé "${currentPet.name}" không?\nToàn bộ dữ liệu sẽ bị xóa hoàn toàn.`);
+  if (!ok) return;
+
+  state.pets = state.pets.filter(p => p.id !== currentPet.id);
+  state.activePetId = null;
+  saveState();
+  showSelectionScreen();
 });
 
+// Đổi giai đoạn dinh dưỡng
+document.getElementById("selectLifeStage").addEventListener("change", function(e) {
+  const pet = getCurrentPet();
+  if (pet) {
+    pet.lifeStage = e.target.value;
+    saveState();
+    renderPetDetailView();
+  }
+});
+
+// Thêm mũi tiêm mới
 document.getElementById("btnToggleAddVaccine").addEventListener("click", () => {
   const form = document.getElementById("vaccineForm");
   const isHidden = form.classList.contains("hidden");
@@ -525,21 +854,18 @@ document.getElementById("btnCancelAddVaccine").addEventListener("click", () => {
   document.getElementById("vaccineForm").classList.add("hidden");
 });
 
-document.getElementById("vaccineForm").addEventListener("submit", function (e) {
+document.getElementById("vaccineForm").addEventListener("submit", function(e) {
   e.preventDefault();
+  const pet = getCurrentPet();
+  if (!pet) return;
 
   const name = document.getElementById("inputVaccineName").value.trim();
   const lastDate = document.getElementById("inputLastDate").value;
   const cycleMonths = parseInt(document.getElementById("selectCycleMonths").value, 10);
   const note = document.getElementById("inputVaccineNote").value.trim();
 
-  if (!name) {
-    alert("Vui lòng nhập tên dịch vụ chăm sóc!");
-    return;
-  }
-
-  if (!lastDate) {
-    alert("Vui lòng chọn ngày thực hiện gần nhất!");
+  if (!name || !lastDate) {
+    alert("Vui lòng điền tên dịch vụ và ngày thực hiện!");
     return;
   }
 
@@ -554,16 +880,21 @@ document.getElementById("vaccineForm").addEventListener("submit", function (e) {
     note
   };
 
-  state.vaccines.push(newVaccine);
+  if (!pet.vaccines) pet.vaccines = [];
+  pet.vaccines.push(newVaccine);
   saveState();
-  renderAll();
+  renderPetDetailView();
 
   this.reset();
   document.getElementById("vaccineForm").classList.add("hidden");
 });
 
-window.handleCompleteVaccine = function (id) {
-  const item = state.vaccines.find(v => v.id === id);
+// Hoàn thành mũi tiêm
+window.handleCompleteVaccine = function(id) {
+  const pet = getCurrentPet();
+  if (!pet || !pet.vaccines) return;
+
+  const item = pet.vaccines.find(v => v.id === id);
   if (!item) return;
 
   const todayStr = new Date().toISOString().split("T")[0];
@@ -573,23 +904,28 @@ window.handleCompleteVaccine = function (id) {
   item.nextDate = newNextDate;
 
   saveState();
-  renderAll();
+  renderPetDetailView();
 };
 
-window.handleDeleteVaccine = function (id) {
-  const item = state.vaccines.find(v => v.id === id);
+// Xoá mũi tiêm
+window.handleDeleteVaccine = function(id) {
+  const pet = getCurrentPet();
+  if (!pet || !pet.vaccines) return;
+
+  const item = pet.vaccines.find(v => v.id === id);
   if (!item) return;
 
   const confirmDelete = confirm(`Bạn có chắc chắn muốn xóa lịch "${item.name}" không?`);
   if (confirmDelete) {
-    state.vaccines = state.vaccines.filter(v => v.id !== id);
+    pet.vaccines = pet.vaccines.filter(v => v.id !== id);
     saveState();
-    renderAll();
+    renderPetDetailView();
   }
 };
 
+// Bộ lọc
 document.querySelectorAll(".filter-btn").forEach(btn => {
-  btn.addEventListener("click", function () {
+  btn.addEventListener("click", function() {
     document.querySelectorAll(".filter-btn").forEach(b => {
       b.classList.remove("active", "bg-slate-900", "text-white");
       b.classList.add("bg-slate-100", "text-slate-600");
@@ -599,23 +935,20 @@ document.querySelectorAll(".filter-btn").forEach(btn => {
     this.classList.remove("bg-slate-100", "text-slate-600");
 
     state.currentFilter = this.getAttribute("data-filter");
-    renderVaccines();
+    renderVaccinesList();
   });
 });
 
-document.getElementById("btnResetDemo").addEventListener("click", () => {
-  const ok = confirm("Bạn có muốn nạp lại dữ liệu mẫu của bé Bơ để trải nghiệm thử không?");
-  if (ok) {
-    state.pet = { ...DEFAULT_PET };
-    state.feeding = { ...DEFAULT_FEEDING };
-    state.vaccines = JSON.parse(JSON.stringify(DEFAULT_VACCINES));
-    saveState();
-    renderAll();
-  }
-});
-
-// Khởi chạy khi tải trang
+// ==========================================
+// 8. KHỞI TẠO KHI TẢI TRANG
+// ==========================================
 window.addEventListener("DOMContentLoaded", () => {
   initData();
-  renderAll();
+
+  // Nếu trước đó đang chọn một bé cụ thể, có thể mở thẳng hoặc mở màn hình chọn
+  if (state.activePetId) {
+    selectPetAndShowDetail(state.activePetId);
+  } else {
+    showSelectionScreen();
+  }
 });
