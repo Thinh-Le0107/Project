@@ -11,6 +11,14 @@ const DOG_BEAGLE_AVATAR = "https://images.unsplash.com/photo-1543466835-00a7907e
 const CAT_ALN_AVATAR = "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=300&auto=format&fit=crop&q=80";
 const DOG_CORGI_AVATAR = "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=300&auto=format&fit=crop&q=80";
 
+// Thông tin tài khoản người dùng mặc định
+const DEFAULT_USER = {
+  email: "thinhle@pawcare.vn",
+  name: "Thịnh Lê",
+  role: "Pet Parent",
+  avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+};
+
 // ==========================================
 // 1. DỮ LIỆU BAN ĐẦU THEO HÌNH ẢNH MẪU
 // ==========================================
@@ -127,12 +135,28 @@ let state = {
   pets: [],
   activePetId: null,
   currentFilter: "all",
-  isManageMode: false
+  isManageMode: false,
+  isLoggedIn: false,
+  currentUser: null
 };
 
 function initData() {
   const savedPets = localStorage.getItem("pawcare_pets_v2");
   const savedActiveId = localStorage.getItem("pawcare_active_pet_id");
+  const savedAuth = localStorage.getItem("pawcare_is_logged_in");
+  const savedUser = localStorage.getItem("pawcare_current_user");
+
+  state.isLoggedIn = savedAuth === "true";
+
+  if (savedUser) {
+    try {
+      state.currentUser = JSON.parse(savedUser);
+    } catch (e) {
+      state.currentUser = { ...DEFAULT_USER };
+    }
+  } else {
+    state.currentUser = { ...DEFAULT_USER };
+  }
 
   if (savedPets) {
     try {
@@ -151,11 +175,66 @@ function initData() {
 
 function saveState() {
   localStorage.setItem("pawcare_pets_v2", JSON.stringify(state.pets));
+  localStorage.setItem("pawcare_is_logged_in", state.isLoggedIn ? "true" : "false");
+  if (state.currentUser) {
+    localStorage.setItem("pawcare_current_user", JSON.stringify(state.currentUser));
+  }
   if (state.activePetId) {
     localStorage.setItem("pawcare_active_pet_id", state.activePetId);
   } else {
     localStorage.removeItem("pawcare_active_pet_id");
   }
+}
+
+/**
+ * Cập nhật giao diện thông tin tài khoản người dùng
+ */
+function updateUserUI() {
+  const user = state.currentUser || DEFAULT_USER;
+  const nameEl = document.getElementById("headerUserName");
+  const roleEl = document.getElementById("headerUserRole");
+  const avatarEl = document.getElementById("headerUserAvatar");
+  const familyTitle = document.getElementById("familyWidgetTitle");
+  const familyAvatar = document.getElementById("familyWidgetAvatar");
+
+  if (nameEl) nameEl.textContent = user.name;
+  if (roleEl) roleEl.textContent = user.role || "Pet Parent";
+  if (avatarEl && user.avatar) avatarEl.src = user.avatar;
+  if (familyTitle) familyTitle.textContent = `Gia đình ${user.name}`;
+  if (familyAvatar && user.avatar) familyAvatar.src = user.avatar;
+
+  const inputEmail = document.getElementById("loginUsername");
+  if (inputEmail && user.email) {
+    inputEmail.value = user.email;
+  }
+}
+
+/**
+ * Xử lý đăng nhập và lưu thông tin tài khoản vào LocalStorage
+ */
+function handleUserLogin(email, customName = null) {
+  let displayName = customName;
+  if (!displayName) {
+    if (email === "thinhle@pawcare.vn" || email.includes("thinhle")) {
+      displayName = "Thịnh Lê";
+    } else {
+      const part = email.split("@")[0];
+      displayName = part.charAt(0).toUpperCase() + part.slice(1);
+    }
+  }
+
+  state.currentUser = {
+    email: email || "thinhle@pawcare.vn",
+    name: displayName || "Thịnh Lê",
+    role: "Pet Parent",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+  };
+  state.isLoggedIn = true;
+  state.activePetId = null; // Luôn bắt đầu từ Bước 2: Chọn thú cưng theo đúng thứ tự!
+
+  saveState();
+  updateUserUI();
+  showSelectionScreen();
 }
 
 function getCurrentPet() {
@@ -272,32 +351,84 @@ function formatDateVN(dateString) {
 
 // ==========================================
 // 4. CHUYỂN ĐỔI GIAO DIỆN (VIEW SWITCHER)
+// Thứ tự luồng nghiêm ngặt:
+// Bước 1: Đăng nhập -> Bước 2: Chọn thú cưng -> Bước 3: Hồ sơ thú cưng
 // ==========================================
 
 /**
- * Hiển thị Màn hình Chọn bạn nhỏ (Pet Selection Screen)
+ * BƯỚC 1: Hiển thị Màn hình Đăng nhập (Login Screen)
+ */
+function showLoginScreen() {
+  state.isLoggedIn = false;
+  state.activePetId = null;
+  state.isManageMode = false;
+  saveState();
+
+  const viewLogin = document.getElementById("viewLogin");
+  const viewSelection = document.getElementById("viewPetSelection");
+  const viewDetail = document.getElementById("viewPetDetail");
+  const headerUser = document.getElementById("headerUserSection");
+
+  if (viewLogin) viewLogin.classList.remove("hidden");
+  if (viewSelection) viewSelection.classList.add("hidden");
+  if (viewDetail) viewDetail.classList.add("hidden");
+  if (headerUser) headerUser.classList.add("hidden");
+
+  updateUserUI();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/**
+ * BƯỚC 2: Hiển thị Màn hình Chọn bạn nhỏ (Pet Selection Screen)
  */
 function showSelectionScreen() {
-  document.getElementById("viewPetSelection").classList.remove("hidden");
-  document.getElementById("viewPetDetail").classList.add("hidden");
+  if (!state.isLoggedIn) {
+    showLoginScreen();
+    return;
+  }
+
+  const viewLogin = document.getElementById("viewLogin");
+  const viewSelection = document.getElementById("viewPetSelection");
+  const viewDetail = document.getElementById("viewPetDetail");
+  const headerUser = document.getElementById("headerUserSection");
+
+  if (viewLogin) viewLogin.classList.add("hidden");
+  if (viewSelection) viewSelection.classList.remove("hidden");
+  if (viewDetail) viewDetail.classList.add("hidden");
+  if (headerUser) headerUser.classList.remove("hidden");
 
   state.activePetId = null;
   state.isManageMode = false;
   saveState();
+  updateUserUI();
   renderPetGrid();
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 /**
- * Chọn 1 bé và mở Màn hình Chi tiết sức khỏe
+ * BƯỚC 3: Chọn 1 bé và mở Màn hình Chi tiết sức khỏe (Pet Detail Dashboard)
  */
 function selectPetAndShowDetail(petId) {
+  if (!state.isLoggedIn) {
+    showLoginScreen();
+    return;
+  }
+
   state.activePetId = petId;
   state.isManageMode = false;
   saveState();
 
-  document.getElementById("viewPetSelection").classList.add("hidden");
-  document.getElementById("viewPetDetail").classList.remove("hidden");
+  const viewLogin = document.getElementById("viewLogin");
+  const viewSelection = document.getElementById("viewPetSelection");
+  const viewDetail = document.getElementById("viewPetDetail");
+  const headerUser = document.getElementById("headerUserSection");
 
+  if (viewLogin) viewLogin.classList.add("hidden");
+  if (viewSelection) viewSelection.classList.add("hidden");
+  if (viewDetail) viewDetail.classList.remove("hidden");
+  if (headerUser) headerUser.classList.remove("hidden");
+
+  updateUserUI();
   renderPetDetailView();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -604,13 +735,44 @@ function renderVaccinesList() {
 // 7. CÁC HÀM XỬ LÝ SỰ KIỆN (EVENT LISTENERS)
 // ==========================================
 
-// Điều hướng
+// Điều hướng Logo PawCare
 document.getElementById("navLogoBtn").addEventListener("click", (e) => {
   e.preventDefault();
-  showSelectionScreen();
+  if (state.isLoggedIn) {
+    showSelectionScreen();
+  } else {
+    showLoginScreen();
+  }
 });
 
+// Điều hướng trở về Chọn thú cưng từ màn hình chi tiết
 document.getElementById("btnBackToSelection").addEventListener("click", showSelectionScreen);
+
+// Đăng xuất tài khoản
+const btnLogout = document.getElementById("btnLogout");
+if (btnLogout) {
+  btnLogout.addEventListener("click", () => {
+    showLoginScreen();
+  });
+}
+
+// Xử lý Form đăng nhập
+const formLogin = document.getElementById("formLogin");
+if (formLogin) {
+  formLogin.addEventListener("submit", function(e) {
+    e.preventDefault();
+    const email = document.getElementById("loginUsername").value.trim();
+    handleUserLogin(email);
+  });
+}
+
+// Đăng nhập nhanh bằng tài khoản mẫu
+const btnQuickDemoLogin = document.getElementById("btnQuickDemoLogin");
+if (btnQuickDemoLogin) {
+  btnQuickDemoLogin.addEventListener("click", function() {
+    handleUserLogin("thinhle@pawcare.vn", "Thịnh Lê");
+  });
+}
 
 // Bật / Tắt chế độ Quản lý hồ sơ (Vị trí 4)
 document.getElementById("btnToggleManageMode").addEventListener("click", () => {
@@ -941,14 +1103,20 @@ document.querySelectorAll(".filter-btn").forEach(btn => {
 
 // ==========================================
 // 8. KHỞI TẠO KHI TẢI TRANG
+// Thứ tự luồng nghiêm ngặt: 
+// Bước 1: Đăng nhập -> Bước 2: Chọn thú cưng -> Bước 3: Hồ sơ thú cưng
 // ==========================================
 window.addEventListener("DOMContentLoaded", () => {
   initData();
 
-  // Nếu trước đó đang chọn một bé cụ thể, có thể mở thẳng hoặc mở màn hình chọn
-  if (state.activePetId) {
+  if (!state.isLoggedIn) {
+    // Chưa đăng nhập: Mở ngay màn hình Đăng nhập
+    showLoginScreen();
+  } else if (state.activePetId) {
+    // Đã đăng nhập và đang xem dở 1 pet: Mở chi tiết
     selectPetAndShowDetail(state.activePetId);
   } else {
+    // Đã đăng nhập: Mở màn hình Chọn thú cưng
     showSelectionScreen();
   }
 });
