@@ -335,7 +335,7 @@ function getVaccineStatus(nextDateString) {
 
   if (diffDays < 0) {
     return { status: "overdue", daysLeft: Math.abs(diffDays) };
-  } else if (diffDays <= 7) {
+  } else if (diffDays <= 14) {
     return { status: "due-soon", daysLeft: diffDays };
   } else {
     return { status: "safe", daysLeft: diffDays };
@@ -612,7 +612,7 @@ function renderPetDetailView() {
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
       </svg>
     `;
-    alertTitle.textContent = `Nhắc nhở: Có ${dueSoonCount} lịch sắp đến hạn trong 7 ngày tới`;
+    alertTitle.textContent = `Nhắc nhở: Có ${dueSoonCount} lịch sắp đến hạn trong 14 ngày tới`;
     alertDesc.textContent = `Kiểm tra lịch hẹn để chuẩn bị thời gian đưa ${pet.name} đi tiêm đúng ngày.`;
     alertBadge.className = "text-xs font-medium px-2.5 py-1 rounded-md bg-amber-100 text-amber-800 border border-amber-200 whitespace-nowrap";
     alertBadge.textContent = "Sắp đến hạn";
@@ -660,67 +660,97 @@ function renderVaccinesList() {
   filteredList.forEach(v => {
     const info = getVaccineStatus(v.nextDate);
     let statusBadgeHtml = "";
-    let borderClass = "border-slate-200";
+    let borderClass = "";
+    let nextDateTextColor = "";
+    let btnCompleteHtml = "";
 
     if (info.status === "overdue") {
-      borderClass = "border-rose-200 bg-rose-50/30";
+      // 1. Quá hạn -> Viền ĐỎ
+      borderClass = "border-2 border-rose-500 bg-rose-50/20";
+      nextDateTextColor = "text-rose-600 font-bold";
       statusBadgeHtml = `
-        <span class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200">
-          <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-rose-100 text-rose-700 border border-rose-300">
+          <span class="w-2 h-2 rounded-full bg-rose-600 animate-pulse"></span>
           Quá hạn ${info.daysLeft} ngày
         </span>
       `;
-    } else if (info.status === "due-soon") {
-      borderClass = "border-amber-200 bg-amber-50/30";
-      statusBadgeHtml = `
-        <span class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">
-          <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-          Còn ${info.daysLeft} ngày nữa
-        </span>
-      `;
-    } else {
-      borderClass = "border-slate-200";
-      statusBadgeHtml = `
-        <span class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
-          <span class="w-1.5 h-1.5 rounded-full bg-pawgreen-500"></span>
-          Còn ${info.daysLeft} ngày
-        </span>
-      `;
-    }
-
-    const itemCard = document.createElement("div");
-    itemCard.className = `p-4 rounded-lg bg-white border ${borderClass} space-y-2.5 transition`;
-    itemCard.innerHTML = `
-      <div class="flex items-start justify-between gap-2">
-        <div class="space-y-0.5">
-          <h4 class="font-semibold text-xs text-slate-900">${v.name}</h4>
-          <p class="text-[11px] text-slate-500">Chu kỳ lặp lại: <strong>${v.cycleMonths} tháng</strong></p>
-        </div>
-        ${statusBadgeHtml}
-      </div>
-
-      <div class="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-2.5 rounded border border-slate-100">
-        <div>
-          <span class="text-slate-400 block text-[10px]">Ngày gần nhất:</span>
-          <span class="font-medium text-slate-700">${formatDateVN(v.lastDate)}</span>
-        </div>
-        <div>
-          <span class="text-slate-400 block text-[10px]">Hạn tiếp theo:</span>
-          <span class="font-semibold ${info.status === 'overdue' ? 'text-rose-600' : 'text-slate-900'}">${formatDateVN(v.nextDate)}</span>
-        </div>
-      </div>
-
-      ${v.note ? `<p class="text-[11px] text-slate-600 bg-slate-50 px-2.5 py-1 rounded border border-slate-200">Ghi chú: ${v.note}</p>` : ''}
-
-      <div class="flex items-center justify-end gap-2 pt-1 border-t border-slate-100">
-        <button onclick="handleCompleteVaccine(${v.id})" class="text-xs font-medium text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-2.5 py-1.5 rounded transition flex items-center gap-1.5 border border-slate-200">
-          <svg class="w-3.5 h-3.5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      btnCompleteHtml = `
+        <button onclick="handleCompleteVaccine(${v.id})" class="text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 border border-rose-600 shadow-2xs" title="Đánh dấu đã hoàn thành và tính chu kỳ tiếp theo">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
           </svg>
           Đã hoàn thành
         </button>
-        <button onclick="handleDeleteVaccine(${v.id})" class="text-xs text-slate-400 hover:text-rose-600 p-1.5 rounded hover:bg-slate-100 transition" title="Xóa lịch này">
-          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+      `;
+    } else if (info.status === "due-soon") {
+      // 2. Gần đến hạn -> Viền VÀNG
+      borderClass = "border-2 border-amber-400 bg-amber-50/25";
+      nextDateTextColor = "text-amber-700 font-bold";
+      const daysText = info.daysLeft === 0 ? "Hôm nay" : `Còn ${info.daysLeft} ngày`;
+      statusBadgeHtml = `
+        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+          <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+          Gần đến hạn • ${daysText}
+        </span>
+      `;
+      btnCompleteHtml = `
+        <button onclick="handleCompleteVaccine(${v.id})" class="text-xs font-semibold text-amber-900 bg-amber-200 hover:bg-amber-300 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 border border-amber-300 shadow-2xs" title="Đánh dấu đã hoàn thành và tính chu kỳ tiếp theo">
+          <svg class="w-3.5 h-3.5 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+          </svg>
+          Đã hoàn thành
+        </button>
+      `;
+    } else {
+      // 3. Đã hoàn thành / An toàn -> Viền XANH LÁ
+      borderClass = "border-2 border-emerald-500 bg-emerald-50/20";
+      nextDateTextColor = "text-emerald-800 font-bold";
+      statusBadgeHtml = `
+        <span class="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+          <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+          </svg>
+          Đã hoàn thành • Còn ${info.daysLeft} ngày
+        </span>
+      `;
+      btnCompleteHtml = `
+        <button onclick="handleCompleteVaccine(${v.id})" class="text-xs font-medium text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 border border-slate-200" title="Cập nhật lại ngày hoàn thành mới nhất">
+          <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+          </svg>
+          Cập nhật ngày tiêm
+        </button>
+      `;
+    }
+
+    const itemCard = document.createElement("div");
+    itemCard.className = `p-4 rounded-xl bg-white border ${borderClass} space-y-3 transition-all`;
+    itemCard.innerHTML = `
+      <div class="flex items-start justify-between gap-2">
+        <div class="space-y-0.5">
+          <h4 class="font-bold text-sm text-slate-900">${v.name}</h4>
+          <p class="text-xs text-slate-500">Chu kỳ lặp lại: <strong class="text-slate-700">${v.cycleMonths} tháng</strong></p>
+        </div>
+        ${statusBadgeHtml}
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 text-xs bg-slate-50/80 p-3 rounded-lg border border-slate-100">
+        <div>
+          <span class="text-slate-400 block text-[11px] font-medium">Ngày gần nhất:</span>
+          <span class="font-semibold text-slate-700">${formatDateVN(v.lastDate)}</span>
+        </div>
+        <div>
+          <span class="text-slate-400 block text-[11px] font-medium">Hạn tiếp theo:</span>
+          <span class="${nextDateTextColor}">${formatDateVN(v.nextDate)}</span>
+        </div>
+      </div>
+
+      ${v.note ? `<p class="text-xs text-slate-600 bg-slate-50/90 px-3 py-1.5 rounded-lg border border-slate-200">Ghi chú: ${v.note}</p>` : ''}
+
+      <div class="flex items-center justify-end gap-2 pt-1 border-t border-slate-100">
+        ${btnCompleteHtml}
+        <button onclick="handleDeleteVaccine(${v.id})" class="text-xs text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-slate-100 transition" title="Xóa lịch này">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
             <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
           </svg>
         </button>
