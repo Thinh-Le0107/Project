@@ -793,6 +793,11 @@ function closeModalAddPet() {
 
 document.getElementById("btnCloseModalAddPet").addEventListener("click", closeModalAddPet);
 document.getElementById("btnCancelModalAddPet").addEventListener("click", closeModalAddPet);
+document.getElementById("modalAddPet").addEventListener("click", (e) => {
+  if (e.target.id === "modalAddPet") {
+    closeModalAddPet();
+  }
+});
 
 // Submit form tạo thú cưng mới
 document.getElementById("formAddPet").addEventListener("submit", function(e) {
@@ -998,22 +1003,39 @@ document.getElementById("selectLifeStage").addEventListener("change", function(e
   }
 });
 
-// Thêm mũi tiêm mới
-document.getElementById("btnToggleAddVaccine").addEventListener("click", () => {
-  const form = document.getElementById("vaccineForm");
-  const isHidden = form.classList.contains("hidden");
-
-  if (isHidden) {
-    form.classList.remove("hidden");
+// Modal Popup: Thêm lịch tiêm chủng mới
+function openModalAddVaccine() {
+  const modal = document.getElementById("modalAddVaccine");
+  if (modal) {
+    modal.classList.remove("hidden");
     const today = new Date().toISOString().split("T")[0];
-    document.getElementById("inputLastDate").value = today;
-  } else {
-    form.classList.add("hidden");
+    const inputDate = document.getElementById("inputLastDate");
+    if (inputDate && !inputDate.value) {
+      inputDate.value = today;
+    }
+    const inputName = document.getElementById("inputVaccineName");
+    if (inputName) {
+      setTimeout(() => inputName.focus(), 50);
+    }
   }
-});
+}
 
-document.getElementById("btnCancelAddVaccine").addEventListener("click", () => {
-  document.getElementById("vaccineForm").classList.add("hidden");
+function closeModalAddVaccine() {
+  const modal = document.getElementById("modalAddVaccine");
+  if (modal) {
+    modal.classList.add("hidden");
+    document.getElementById("vaccineForm").reset();
+  }
+}
+
+document.getElementById("btnToggleAddVaccine").addEventListener("click", openModalAddVaccine);
+document.getElementById("btnCloseModalAddVaccine").addEventListener("click", closeModalAddVaccine);
+document.getElementById("btnCancelAddVaccine").addEventListener("click", closeModalAddVaccine);
+
+document.getElementById("modalAddVaccine").addEventListener("click", (e) => {
+  if (e.target.id === "modalAddVaccine") {
+    closeModalAddVaccine();
+  }
 });
 
 document.getElementById("vaccineForm").addEventListener("submit", function(e) {
@@ -1047,8 +1069,7 @@ document.getElementById("vaccineForm").addEventListener("submit", function(e) {
   saveState();
   renderPetDetailView();
 
-  this.reset();
-  document.getElementById("vaccineForm").classList.add("hidden");
+  closeModalAddVaccine();
 });
 
 // Hoàn thành mũi tiêm
