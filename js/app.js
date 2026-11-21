@@ -578,6 +578,24 @@ function renderPetDetailView() {
   const totalCount = vaccines.length;
   const attentionCount = overdueCount + dueSoonCount;
 
+  // Cập nhật huy hiệu Tình trạng sức khỏe của Pet (Khỏe mạnh / Chú Ý)
+  const healthBadge = document.getElementById("displayPetHealthBadge");
+  if (healthBadge) {
+    if (attentionCount === 0) {
+      healthBadge.className = "px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium inline-flex items-center gap-1.5 transition";
+      healthBadge.innerHTML = `
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+        Khỏe mạnh
+      `;
+    } else {
+      healthBadge.className = "px-2 py-0.5 rounded bg-rose-50 text-rose-600 border border-rose-300 font-bold inline-flex items-center gap-1.5 transition shadow-2xs";
+      healthBadge.innerHTML = `
+        <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+        Chú Ý
+      `;
+    }
+  }
+
   document.getElementById("statTotalVaccines").textContent = totalCount;
   document.getElementById("statSafeCount").textContent = safeCount;
   document.getElementById("statAttentionCount").textContent = attentionCount;
@@ -675,7 +693,7 @@ function renderVaccinesList() {
         </span>
       `;
       btnCompleteHtml = `
-        <button onclick="handleCompleteVaccine(${v.id})" class="text-xs font-medium text-slate-600 hover:text-slate-900 bg-transparent hover:bg-slate-50 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 border border-slate-300 shadow-2xs" title="Đánh dấu hoàn thành lịch này">
+        <button onclick="handleCompleteVaccine(${v.id})" class="text-xs font-medium text-slate-700 hover:text-slate-900 bg-transparent hover:bg-slate-100 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 border border-slate-300 shadow-2xs cursor-pointer" title="Đánh dấu hoàn thành lịch này">
           Hoàn thành
         </button>
       `;
@@ -691,7 +709,7 @@ function renderVaccinesList() {
         </span>
       `;
       btnCompleteHtml = `
-        <button onclick="handleCompleteVaccine(${v.id})" class="text-xs font-medium text-slate-600 hover:text-slate-900 bg-transparent hover:bg-slate-50 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 border border-slate-300 shadow-2xs" title="Đánh dấu hoàn thành lịch này">
+        <button onclick="handleCompleteVaccine(${v.id})" class="text-xs font-medium text-slate-700 hover:text-slate-900 bg-transparent hover:bg-slate-100 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 border border-slate-300 shadow-2xs cursor-pointer" title="Đánh dấu hoàn thành lịch này">
           Hoàn thành
         </button>
       `;
@@ -708,8 +726,8 @@ function renderVaccinesList() {
         </span>
       `;
       btnCompleteHtml = `
-        <button onclick="handleCompleteVaccine(${v.id})" class="text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 border border-emerald-200/90 shadow-2xs" title="Đã hoàn thành • Bấm để cập nhật lại ngày tiêm nếu cần">
-          <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <button onclick="handleCompleteVaccine(${v.id})" class="text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 shadow-xs cursor-pointer" title="Đã hoàn thành • Bấm để hoàn tác nếu cần">
+          <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
           </svg>
           Đã hoàn thành
@@ -1096,7 +1114,7 @@ document.getElementById("vaccineForm").addEventListener("submit", function(e) {
   closeModalAddVaccine();
 });
 
-// Hoàn thành mũi tiêm
+// Hoàn thành mũi tiêm (hỗ trợ toggle hoàn tác)
 window.handleCompleteVaccine = function(id) {
   const pet = getCurrentPet();
   if (!pet || !pet.vaccines) return;
@@ -1104,11 +1122,31 @@ window.handleCompleteVaccine = function(id) {
   const item = pet.vaccines.find(v => v.id === id);
   if (!item) return;
 
-  const todayStr = new Date().toISOString().split("T")[0];
-  const newNextDate = calculateNextDate(todayStr, item.cycleMonths);
+  const info = getVaccineStatus(item.nextDate);
 
-  item.lastDate = todayStr;
-  item.nextDate = newNextDate;
+  if (info.status === "safe") {
+    // Nếu đã hoàn thành, bấm lại sẽ hoàn tác trở lại trạng thái chưa xong
+    if (item._prevLastDate !== undefined && item._prevNextDate !== undefined) {
+      item.lastDate = item._prevLastDate;
+      item.nextDate = item._prevNextDate;
+      delete item._prevLastDate;
+      delete item._prevNextDate;
+    } else {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      item.nextDate = yesterday.toISOString().split("T")[0];
+    }
+  } else {
+    // Khi chưa xong, bấm Hoàn thành sẽ chuyển sang trạng thái đã xong
+    item._prevLastDate = item.lastDate;
+    item._prevNextDate = item.nextDate;
+
+    const todayStr = new Date().toISOString().split("T")[0];
+    const newNextDate = calculateNextDate(todayStr, item.cycleMonths);
+
+    item.lastDate = todayStr;
+    item.nextDate = newNextDate;
+  }
 
   saveState();
   renderPetDetailView();
