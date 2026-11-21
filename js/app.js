@@ -675,11 +675,8 @@ function renderVaccinesList() {
         </span>
       `;
       btnCompleteHtml = `
-        <button onclick="handleCompleteVaccine(${v.id})" class="text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 border border-rose-200/80 shadow-2xs" title="Đánh dấu đã hoàn thành và tính chu kỳ tiếp theo">
-          <svg class="w-3.5 h-3.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-          </svg>
-          Đã hoàn thành
+        <button onclick="handleCompleteVaccine(${v.id})" class="text-xs font-medium text-slate-600 hover:text-slate-900 bg-transparent hover:bg-slate-50 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 border border-slate-300 shadow-2xs" title="Đánh dấu hoàn thành lịch này">
+          Hoàn thành
         </button>
       `;
     } else if (info.status === "due-soon") {
@@ -694,11 +691,8 @@ function renderVaccinesList() {
         </span>
       `;
       btnCompleteHtml = `
-        <button onclick="handleCompleteVaccine(${v.id})" class="text-xs font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 border border-amber-200/80 shadow-2xs" title="Đánh dấu đã hoàn thành và tính chu kỳ tiếp theo">
-          <svg class="w-3.5 h-3.5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-          </svg>
-          Đã hoàn thành
+        <button onclick="handleCompleteVaccine(${v.id})" class="text-xs font-medium text-slate-600 hover:text-slate-900 bg-transparent hover:bg-slate-50 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 border border-slate-300 shadow-2xs" title="Đánh dấu hoàn thành lịch này">
+          Hoàn thành
         </button>
       `;
     } else {
@@ -714,11 +708,11 @@ function renderVaccinesList() {
         </span>
       `;
       btnCompleteHtml = `
-        <button onclick="handleCompleteVaccine(${v.id})" class="text-xs font-medium text-slate-600 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 border border-slate-200" title="Cập nhật lại ngày hoàn thành mới nhất">
-          <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <button onclick="handleCompleteVaccine(${v.id})" class="text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 border border-emerald-200/90 shadow-2xs" title="Đã hoàn thành • Bấm để cập nhật lại ngày tiêm nếu cần">
+          <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
           </svg>
-          Cập nhật ngày tiêm
+          Đã hoàn thành
         </button>
       `;
     }
